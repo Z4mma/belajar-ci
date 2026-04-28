@@ -25,10 +25,12 @@ class AuthController extends BaseController
                 session()->set([
                     'username' => $dataUser['username'],
                     'role' => $dataUser['role'],
+                    'email' => 'admin@mail.com',
+                    'login_time' => date('Y-m-d H:i'),
                     'isLoggedIn' => TRUE
                 ]);
 
-                return redirect()->to(base_url('/'));
+                return redirect()->to(base_url('/profile'));
             } else {
                 session()->setFlashdata('failed', 'Username & Password Salah');
                 return redirect()->back();

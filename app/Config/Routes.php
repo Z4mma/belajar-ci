@@ -9,6 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index', ['filter' => 'auth']);
 
 $routes->get('login', 'AuthController::login');
+$routes->get('/profile', 'Profile::index', ['filter' => 'auth']);
 $routes->post('login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
 
