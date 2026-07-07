@@ -49,6 +49,12 @@
     ]) ?>
 </div>
 
+<small>
+    Kupon tersedia:
+    <strong>HEMAT15</strong> (15%) |
+    <strong>HEMAT30</strong> (30%)
+</small>
+
 <div class="col-12">
     <?= form_submit(
         'submit',

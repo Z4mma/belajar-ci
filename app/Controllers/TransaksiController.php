@@ -16,7 +16,8 @@ class TransaksiController extends BaseController
     protected $transactionDetailModel;
     public function __construct(){
 
-    helper(['number', 'form', 'TransaksiHelper']);
+    helper(['number', 'form', 'transaksi']);
+    
     $this->cart = service('cart');
     $this->transactionModel = new TransactionModel();
     $this->transactionDetailModel = new TransactionDetailModel(); 
@@ -222,6 +223,24 @@ public function buy()
 
 		//hapus session keranjang belanja 
     $this->cart->destroy();
-    return redirect()->to(base_url());
+    return redirect()->to(site_url('checkout/success/'.$transactionId));
 }
+public function success($id)
+{
+    $transaction = $this->transactionModel->find($id);
+
+    if (!$transaction) {
+        throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+    }
+
+    $details = $this->transactionDetailModel
+        ->where('transaction_id', $id)
+        ->findAll();
+
+    return view('v_ringkasan_checkout', [
+    'title' => 'Ringkasan Checkout',
+    'transaction' => $transaction,
+    'details' => $details
+    ]);
+    }
 }
