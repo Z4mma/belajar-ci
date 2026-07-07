@@ -38,6 +38,17 @@
         'class'    => 'form-control',
         'readonly' => true]) ?>
 </div>
+
+<div class="col-12">
+    <?= form_label('Kode Kupon', 'kupon_code', ['class' => 'form-label']) ?>
+    <?= form_input([
+        'name'        => 'kupon_code',
+        'id'          => 'kupon_code',
+        'class'       => 'form-control',
+        'placeholder' => 'HEMAT / SUPER'
+    ]) ?>
+</div>
+
 <div class="col-12">
     <?= form_submit(
         'submit',
@@ -77,7 +88,32 @@
           <td>Subtotal</td>
           <td><?= number_to_currency($total, 'IDR') ?></td>
       </tr>
-      <tr>
+     <tr>
+        <td colspan="2"></td>
+        <td>Biaya Admin</td>
+        <td id="biaya_admin">IDR 0</td>
+     </tr>
+
+     <tr>
+        <td colspan="2"></td>
+        <td style="color:red">
+            Diskon Kupon
+        </td>
+        <td id="diskon_kupon" style="color:red">
+            IDR 0
+        </td>
+     </tr>
+
+     <tr>
+        <td colspan="2"></td>
+        <td style="color:green">
+            Cashback
+        </td>
+        <td id="cashback" style="color:green">
+            IDR 0
+        </td>
+     </tr>
+     <tr>
           <td colspan="2"></td>
           <td>Total</td>
           <td><span id="total"><?= number_to_currency($total, 'IDR') ?></span></td>
@@ -94,13 +130,43 @@ $(document).ready(function() {
     let subtotal = <?= $total ?>;
     hitungTotal();
 
-    function hitungTotal() {
-        let total = subtotal + ongkir;
+function hitungTotal(){
 
-        $("#ongkir").val(ongkir);
-        $("#total").text(`IDR ${total.toLocaleString('id-ID')}`);
-        $("#total_harga").val(total);
-}
+    let admin = 0;
+
+    if(subtotal <= 20000000){
+        admin = subtotal * 0.005;
+    }else{
+        admin = subtotal * 0.0075;
+    }
+
+    let kupon = $("#kupon_code").val().toUpperCase();
+
+    let diskon = 0;
+
+    if(kupon=="HEMAT"){
+        diskon = subtotal * 0.15;
+    }
+
+    if(kupon=="SUPER"){
+        diskon = subtotal * 0.20;
+    }
+
+    let cashback = 0;
+
+    if(subtotal>10000000){
+        cashback = subtotal * 0.02;
+    }
+
+    let total = subtotal + ongkir + admin - diskon;
+
+    $("#ongkir").val(ongkir);
+    $("#total").text("IDR "+total.toLocaleString('id-ID'));
+    $("#biaya_admin").text("IDR "+admin.toLocaleString('id-ID'));
+    $("#diskon_kupon").text("- IDR "+diskon.toLocaleString('id-ID'));
+    $("#cashback").text("IDR "+cashback.toLocaleString('id-ID'));
+    }
+
 	$('#kelurahan').select2({
 	    placeholder: 'Cari daerah tujuan',
 	    minimumInputLength: 3,
@@ -144,10 +210,15 @@ $(document).ready(function() {
 });
 });
 
-    $("#layanan").on('change', function () {
-        ongkir = parseInt($(this).val());
-        hitungTotal();
-    });
+   $("#layanan").on('change', function () {
+    ongkir = parseInt($(this).val()) || 0;
+    hitungTotal();
+});
+
+   $("#kupon_code").on('input', function () {
+    hitungTotal();
+});
+
 });
 </script>
 <?= $this->endSection() ?>

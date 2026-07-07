@@ -16,7 +16,7 @@ class TransaksiController extends BaseController
     protected $transactionDetailModel;
     public function __construct(){
 
-    helper(['number', 'form']);
+    helper(['number', 'form', 'TransaksiHelper']);
     $this->cart = service('cart');
     $this->transactionModel = new TransactionModel();
     $this->transactionDetailModel = new TransactionDetailModel(); 
@@ -164,19 +164,36 @@ public function buy()
     $db->transStart(); 
 
     $subtotal = 0;
-    foreach ($cartItems as $item) {
-        $subtotal += $item['qty'] * $item['price'];
-    }
+
+        foreach ($cartItems as $item) {
+            $subtotal += $item['qty'] * $item['price'];
+            }
+            // hitung biaya admin, diskon kupon, dan cashback
+            $kupon = strtoupper($this->request->getPost('kupon_code'));
+            $biayaAdmin = hitung_biaya_admin($subtotal);
+            $diskonKupon = hitung_diskon_kupon($subtotal,$kupon);
+            $cashback = hitung_cashback($subtotal);
+    
+    
 
     $ongkir = (int) $this->request->getPost('ongkir');
 
     $transaction = [
-        'username'    => $this->request->getPost('username'),
-        'alamat'      => $this->request->getPost('alamat'),
-        'ongkir'      => $ongkir,
-        'total_harga' => $subtotal + $ongkir,
-        'status'      => 0, 
-    ];
+
+    'username'=>$this->request->getPost('username'),
+    'alamat'=>$this->request->getPost('alamat'),
+    'ongkir'=>$ongkir,
+
+    'total_harga'=>$subtotal+$ongkir+$biayaAdmin-$diskonKupon,
+    
+    'biaya_admin'=>$biayaAdmin,
+    'kupon_code'=>$kupon,
+    'diskon_kupon'=>$diskonKupon,
+    'cashback'=>$cashback,
+    
+    'status'=>0,
+
+];
 
     // insert transaction
     if (!$this->transactionModel->insert($transaction)) {
